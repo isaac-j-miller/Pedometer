@@ -5,11 +5,11 @@ class PointPair
 {
 public:
 	PointPair();
-	void push(float val);
-	float front();
-	float back();
+	void push(int val);
+	int front();
+	int back();
 private:
-	float _front = 0.f;
-	float _back = 0.f;
+	int _front = 0;
+	int _back = 0;
 };
 #endif

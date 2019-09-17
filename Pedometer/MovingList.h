@@ -9,18 +9,18 @@ class MovingList
 public:
 	MovingList(int length);
 	~MovingList();
-	void push(float value);
-	float front();
-	float left_sum();
-	float right_sum();
-	float average();
+	void push(int value);
+	int front();
+	int left_sum();
+	int right_sum();
+	int average();
 	bool full();
-	float operator[](int index);
+	int operator[](int index);
 private:
 	int _len = 0;
 	int _hlen = 0;
 	int _actualSize = 0;
-	float* _values = NULL;
+	int* _values = NULL;
 };
 #endif
 

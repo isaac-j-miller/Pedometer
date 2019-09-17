@@ -3,13 +3,13 @@
 PointPair::PointPair() {
 
 }
-void PointPair::push(float val) {
+void PointPair::push(int val) {
 	_back = _front;
 	_front = val;
 }
-float PointPair::front() {
+int PointPair::front() {
 	return _front;
 }
-float PointPair::back() {
+int PointPair::back() {
 	return _back;
 }

@@ -4,7 +4,7 @@ MovingList::MovingList(int length) {
 	_len = length;
 	_hlen = _len / 2;
 	_actualSize = 0;
-	_values = new float[_len];
+	_values = new int[_len];
 	for (int i = 0; i < _len; i++) {
 		_values[i] = 0;
 	}
@@ -12,7 +12,7 @@ MovingList::MovingList(int length) {
 MovingList::~MovingList() {
 	delete[] _values;
 }
-void MovingList::push(float value) {
+void MovingList::push(int value) {
 	if (_actualSize < _len) {
 		_values[_actualSize] = value;
 		_actualSize++;
@@ -24,25 +24,25 @@ void MovingList::push(float value) {
 		_values[_len - 1] = value;
 	}
 }
-float MovingList::front() {
+int MovingList::front() {
 	return _values[_actualSize - 1];
 }
-float MovingList::left_sum() {
-	float sum = 0;
+int MovingList::left_sum() {
+	int sum = 0;
 	for (int i = 0; i < _hlen; i++) {
 		sum += _values[i];
 	}
 	return sum;
 }
-float MovingList::right_sum() {
-	float sum = 0;
+int MovingList::right_sum() {
+	int sum = 0;
 	for (int i = _hlen; i < _len; i++) {
 		sum += _values[i];
 	}
 	return sum;
 }
-float MovingList::average() {
-	float sum = 0;
+int MovingList::average() {
+	int sum = 0;
 	for (int i = 0; i < _len; i++) {
 		sum += _values[i];
 	}
@@ -51,7 +51,7 @@ float MovingList::average() {
 bool MovingList::full() {
 	return _actualSize == _len;
 }
-float MovingList::operator[](int index) {
+int MovingList::operator[](int index) {
 	if (index < 0) {
 		index -= _actualSize;
 	}

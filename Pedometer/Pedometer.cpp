@@ -17,29 +17,36 @@ bool Pedometer::detect_step() {
 	}
 	return false;
 }
-bool Pedometer::add_point(float mag) {
+bool Pedometer::add_point(int mag) {
 	index++;
 	if (index > STARTUP_TIME) {
 		numPoints++;
 		dataPoints->push(mag);
 		if (numPoints > 1) {
 			derivative->push(dataPoints->front() - dataPoints->back());
+			
+			
+			
 			sma->push(derivative->average());
-			ema->push(sma->front() * K + ema->front() * (1 - K));
-			if (numPoints > 2) {
-				detectDeriv->push(ema->front() - ema->back());
-				return detect_step();
+			if (sma->full()) {
+				ema->push((sma->front() * K + ema->front() * (SCALE-K))/SCALE);
+				if (numPoints > EMA_WINDOW) {
+					detectDeriv->push(ema->front() - ema->back());
+					return detect_step();
+
+				}
 			}
+			
 		}
 	}
 	return false;
 }
-float Pedometer::read_accelerometer(int x, int y, int z) {
+int Pedometer::read_accelerometer(int x, int y, int z) {
 	
 
 
-	return (float)sqrt(pow((float)x , 2) + pow((float)y , 2) + pow((float)z , 2));
+	return SCALE*sqrt(pow(x , 2) + pow(y , 2) + pow(z , 2));
 }
 void Pedometer::output_data() {
-	std::cout << "Total Steps: " << steps << std::endl;
+	std::cout << "Total Steps: " << steps << "; datapoint: " << dataPoints->front() << "; sma: " << sma->front() << "; ema: " << ema->front() << "; detect: " << detectDeriv->front() << std::endl;
 }
