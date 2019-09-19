@@ -1,7 +1,6 @@
 #ifndef NULL
 #define NULL 0
 #endif
-
 #ifndef MOVINGLIST_H
 #define MOVINGLIST_H
 class MovingList
@@ -23,4 +22,3 @@ private:
 	int* _values = NULL;
 };
 #endif
-
