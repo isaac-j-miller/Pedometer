@@ -1,5 +1,5 @@
-
 #include "PointPair.h"
+
 PointPair::PointPair() {
 
 }

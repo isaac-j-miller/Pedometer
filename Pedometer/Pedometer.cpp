@@ -5,6 +5,7 @@
 Pedometer::Pedometer() {
 
 }
+
 bool Pedometer::detect_step() {
 	if (numPoints - mostRecent > TIMING_THRESHOLD) {
 		float left = detectDeriv->left_sum();
@@ -17,6 +18,7 @@ bool Pedometer::detect_step() {
 	}
 	return false;
 }
+
 bool Pedometer::add_point(int mag) {
 	index++;
 	if (index > STARTUP_TIME) {
@@ -24,27 +26,19 @@ bool Pedometer::add_point(int mag) {
 		dataPoints->push(mag);
 		if (numPoints > 1) {
 			derivative->push(dataPoints->front() - dataPoints->back());
-			
-			
-			
 			sma->push(derivative->average());
 			if (sma->full()) {
 				ema->push((sma->front() * K + ema->front() * (SCALE-K))/SCALE);
 				if (numPoints > EMA_WINDOW) {
 					detectDeriv->push(ema->front() - ema->back());
 					return detect_step();
-
 				}
 			}
-			
 		}
 	}
 	return false;
 }
 int Pedometer::read_accelerometer(int x, int y, int z) {
-	
-
-
 	return SCALE*sqrt(pow(x , 2) + pow(y , 2) + pow(z , 2));
 }
 void Pedometer::output_data() {
