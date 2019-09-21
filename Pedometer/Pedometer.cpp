@@ -5,7 +5,6 @@
 Pedometer::Pedometer() {
 
 }
-
 bool Pedometer::detect_step() {
 	if (numPoints - mostRecent > TIMING_THRESHOLD) {
 		float left = detectDeriv->left_sum();
@@ -18,7 +17,6 @@ bool Pedometer::detect_step() {
 	}
 	return false;
 }
-
 bool Pedometer::add_point(int mag) {
 	index++;
 	if (index > STARTUP_TIME) {
