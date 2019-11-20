@@ -100,6 +100,7 @@ bool handshake(uint16_t trials, unsigned long int numSteps){
 
 bool getReceipt(String header, String data){
 	digitalWrite(RADIO_SLEEP, LOW);
+	digitalWrite(LED_BUILTIN,HIGH);
 	delay(100);
 	while(Serial1.available()){
 		Serial1.read();
@@ -124,6 +125,7 @@ bool getReceipt(String header, String data){
 	//delay(1000);
 	Serial1.flush();
 	digitalWrite(RADIO_SLEEP, HIGH);
+	digitalWrite(LED_BUILTIN,LOW);
 	return a!=-1;
 }
 
