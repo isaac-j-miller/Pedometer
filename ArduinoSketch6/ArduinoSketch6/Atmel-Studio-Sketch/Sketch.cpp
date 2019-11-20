@@ -140,10 +140,8 @@ void wakeup(){
 	if(asleep){
 		flashNtimes(0xA5, 5);
 	}
-	if(accel.getTap()){
-		transmitted=false;
-		tapped = true;
-	}
+	tapped |= accel.getTap();
+	transmitted &= !tapped;
 	asleep = false;
 }
 
@@ -200,8 +198,8 @@ void loop() {
 	if(pedometerReady && !prevPedometerReady){
 		flashNtimes(0xFF, 3);
 	}
-	tapped |= accel.getTap();
-	transmitted &= !tapped;
+	//tapped |= accel.getTap();
+	//transmitted &= !tapped;
 	if(tapped && !transmitted){
 		tapped = false;
 		if(getReceipt("STEPS", String(numSteps))){
@@ -227,7 +225,7 @@ void loop() {
 	xf = accel.convertRawToFloat(x);
 	yf = accel.convertRawToFloat(y);
 	zf = accel.convertRawToFloat(z);
-	tapped |= accel.getTap();
+	//tapped |= accel.getTap();
 	
 	if(accel.dataReady()){
 		digitalWrite(LED_BUILTIN, HIGH);
@@ -245,10 +243,9 @@ void loop() {
 		else if (averageMagnitude < range*0.25 & rawRange > ADXL345::ADXL_RANGE::TWO_G){  //if close to minimum range
 			accel.setRange(rawRange-1);
 		}
-		tapped |= accel.getTap();
 	}
 	else{
-		tapped |= accel.getTap();
+		
 		digitalWrite(LED_BUILTIN, LOW);
 	}
 	prevPedometerReady=pedometerReady;

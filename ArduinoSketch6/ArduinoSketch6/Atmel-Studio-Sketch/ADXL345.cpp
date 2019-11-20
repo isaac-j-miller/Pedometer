@@ -51,10 +51,10 @@ void ADXL345::setup(int _CS_PIN,int _WAKEUP_PIN, ADXL_RANGE _RANGE/*=ADXL_RANGE:
 	writeRegister(INT_MAP,INT_MAP_FORMAT);
 	
 	//configure tap
-	writeRegister(THRESH_TAP, 40);
-	writeRegister(WINDOW, 200);
-	writeRegister(TAP_DUR, 24);
-	writeRegister(TAP_LATENCY,80);
+	writeRegister(THRESH_TAP, 200);
+	writeRegister(WINDOW, 3);
+	writeRegister(TAP_DUR, 1);
+	writeRegister(TAP_LATENCY,0);
 	writeRegister(TAP_AXES, 0x01);
 	//configure active/inactive
 	writeRegister(THRESH_ACT,15);
