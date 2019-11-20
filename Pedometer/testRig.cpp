@@ -10,7 +10,7 @@ Pedometer pedometer;
 int main()
 {
 	//create a string with the full/absolute file path for the data to be read.
-	std::string fileName = "48_steps_trimmed.csv";
+	std::string fileName = "14_steps_trimmed.csv";
 
 	//create the reader object to parse a file with 3 columns
 	io::CSVReader<3> in(fileName);

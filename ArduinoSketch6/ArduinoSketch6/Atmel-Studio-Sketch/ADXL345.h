@@ -18,9 +18,9 @@
 #define POWER_CTRL 0x2D
 #define DATA_FORMAT 0x31
 #define INT_ENABLE 0x2E
-#define INT_ENABLE_FORMAT 0x30 //allows double tap and activity to trigger interrupts
+#define INT_ENABLE_FORMAT 0x18 //allows inactivity and activity to trigger interrupts
 #define INT_MAP 0x2F
-#define INT_MAP_FORMAT 0xEF
+#define INT_MAP_FORMAT 0x30
 #define TAP_AXES 0x2A 
 #define TAP_AXES_FORMAT 0x01
 #define TAP_LATENCY 0x22
@@ -28,6 +28,8 @@
 #define THRESH_TAP 0x1D
 #define THRESH_ACT 0x24
 #define ACT_CRTL 0x27
+#define TIME_INACT 0x26
+#define THRESH_INACT 0x25
 #define INT_SOURCE 0x30
 #define TAP_DUR 0x21
 #define RATE_ADDRESS 0x2C
@@ -133,11 +135,12 @@ public:
 	void setResolution(ADXL_RESOLUTION);
 	
 	void setRate(ADXL_RATE);
-	
+
 	bool getTap();
 	uint8_t getRange();
 	float getRate();
-	void resetTap();
+	bool isActive();
+	bool isInactive();
 	bool dataReady();
 	
 protected:

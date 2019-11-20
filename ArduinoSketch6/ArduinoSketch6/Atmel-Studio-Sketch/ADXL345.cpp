@@ -52,13 +52,15 @@ void ADXL345::setup(int _CS_PIN,int _WAKEUP_PIN, ADXL_RANGE _RANGE/*=ADXL_RANGE:
 	
 	//configure tap
 	writeRegister(THRESH_TAP, 40);
-	writeRegister(WINDOW, 240);
-	writeRegister(TAP_DUR, 32);
+	writeRegister(WINDOW, 200);
+	writeRegister(TAP_DUR, 24);
 	writeRegister(TAP_LATENCY,80);
 	writeRegister(TAP_AXES, 0x01);
-	//configure active
-	writeRegister(THRESH_ACT,8);
+	//configure active/inactive
+	writeRegister(THRESH_ACT,15);
 	writeRegister(ACT_CRTL,0xFF);
+	writeRegister(TIME_INACT, 5); //sleep after 5 seconds of inactivity
+	writeRegister(THRESH_INACT,15);
 	//***Step #3 (Optional) ***
 	//write to the DATA_FORMAT register to adjust the sampling resolution
 	setResolution(_RESOLUTION);
@@ -215,11 +217,15 @@ bool ADXL345::getTap(){
 	uint8_t src =readRegister(INT_SOURCE);
 	return src&(1<<5);
 }
-void ADXL345::resetTap(){
-	writeRegister(INT_ENABLE, 0x00);
-	writeRegister(INT_ENABLE,INT_ENABLE_FORMAT);
-}
 bool ADXL345::dataReady(){
 	uint8_t src =readRegister(INT_SOURCE);
 	return (src&(1<<7));
+}
+bool ADXL345::isActive(){
+	uint8_t src =readRegister(INT_SOURCE);
+	return (src&(1<<4));
+}
+bool ADXL345::isInactive(){
+	uint8_t src =readRegister(INT_SOURCE);
+	return (src&(1<<3));
 }

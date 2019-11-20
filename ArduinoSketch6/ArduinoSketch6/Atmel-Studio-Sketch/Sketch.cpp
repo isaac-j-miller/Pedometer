@@ -1,6 +1,7 @@
 ﻿/*Begining of Auto generated code by Atmel studio */
 #include <Arduino.h>
 #include <avr/sleep.h>
+#include <avr/interrupt.h>
 /*End of auto generated code by Atmel studio */
 
 
@@ -29,11 +30,12 @@
 
 const int RADIO_SLEEP = A4;
 const int CS_PIN = 7;
-//const int TAP_PIN = 4;
 const int WAKEUP_PIN = 3;
-const int LEDS[] = {2, 6, 5, 9, 10, 11, 12, A5};  // LEDs used for binary counter
+const int SLEEP_PIN = 2;
+const int LEDS[] = {4, 6, 5, 9, 10, 11, 12, A5};  // LEDs used for binary counter
 const int UP[] = {1,3,7,15,31,63,127,255};
 const int DOWN[] = {128,192,224,240,248,252,254,255};
+bool asleep = false;
 
 void displayLED(uint8_t number){
 	for(int i = 0; i < 8; i++){
@@ -55,9 +57,9 @@ void displayDownSequence(){
 	}
 }
 
-void flash3times(){
-	for(int i =0; i<3;i++){
-		displayLED(255);
+void flashNtimes(uint8_t value, int n){
+	for(int i =0; i<n;i++){
+		displayLED(value);
 		delay(50);
 		displayLED(0);
 		delay(50);
@@ -125,19 +127,46 @@ bool getReceipt(String header, String data){
 	return a!=-1;
 }
 
-//
-
 
 ADXL345 accel;
 Pedometer pedometer;
-MovingList<float> magnitudes(5);  //list of magnitudes used for keeping track of average magnitude for range purposes
+MovingList<float> magnitudes(5);  //list of magnitudes used for keeping track of average magnitude for range and sleep purposes
+bool tapped = false;
 bool transmitted = true;
 int trials =0;
 int maxTrials = 1;
+//
+void wakeup(){
+	if(asleep){
+		flashNtimes(0xA5, 5);
+	}
+	if(accel.getTap()){
+		transmitted=false;
+		tapped = true;
+	}
+	asleep = false;
+}
+
+void goToSleep(){
+	set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+	cli();
+	if(pedometer.ready() && !tapped && transmitted){
+		asleep=true;
+		sleep_enable();
+		sei();
+		sleep_cpu();
+		sleep_disable();
+	}
+	sei();
+}
+
+
+
 void setup() {
 
 	//setup SPI interface for CPOL=1, CPHA=1 or SPI_MODE_3 in Arduino
 	pinMode(RADIO_SLEEP,OUTPUT);
+	pinMode(WAKEUP_PIN, INPUT_PULLUP);
 	//pinMode(TAP_PIN,INPUT);
 	for (auto i: LEDS){  //set up LEDs for binary counter
 		pinMode(i, OUTPUT);
@@ -151,6 +180,9 @@ void setup() {
 	SPI.setDataMode(SPI_MODE3); //this works best. New SPI_TRANSACTION is not well documented
 	
 	accel.setup(CS_PIN, WAKEUP_PIN,ADXL345::EIGHT_G, ADXL345::NORMAL_RESOLUTION, ADXL345::O25);
+	//accel.setSleepTime(10);
+	attachInterrupt(digitalPinToInterrupt(WAKEUP_PIN),wakeup,RISING);
+	attachInterrupt(digitalPinToInterrupt(SLEEP_PIN),goToSleep,RISING);
 	
 	while(!accel.selfTest());
 	
@@ -161,13 +193,12 @@ void loop() {
 	static int16_t numSteps;
 	static float magnitude;
 	static float xf, yf, zf;
-	static bool tapped = false;
-	static bool transmitted = true;
+	
 	static bool pedometerReady = false;
 	static bool prevPedometerReady = false;
 	pedometerReady=pedometer.ready();
 	if(pedometerReady && !prevPedometerReady){
-		flash3times();
+		flashNtimes(0xFF, 3);
 	}
 	tapped |= accel.getTap();
 	transmitted &= !tapped;
@@ -187,6 +218,8 @@ void loop() {
 		}
 	}
 	displayLED(numSteps);
+	//displayLED(0xF0*accel.isActive()+0x0F*accel.isInactive());
+	
 	x = accel.getXAcceleration();
 	y = accel.getYAcceleration();
 	z = accel.getZAcceleration();
@@ -219,7 +252,4 @@ void loop() {
 		digitalWrite(LED_BUILTIN, LOW);
 	}
 	prevPedometerReady=pedometerReady;
-	
-	
-	
 }
