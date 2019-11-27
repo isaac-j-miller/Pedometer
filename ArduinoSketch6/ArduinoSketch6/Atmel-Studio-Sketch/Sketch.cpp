@@ -27,11 +27,11 @@
 #include "Helper.h"
 #include "Pedometer.h"
 
-
 const int RADIO_SLEEP = A4;
 const int CS_PIN = 7;
 const int WAKEUP_PIN = 3;
 const int SLEEP_PIN = 2;
+const int SEND_BUTTON = 8;
 const int LEDS[] = {4, 6, 5, 9, 10, 11, 12, A5};  // LEDs used for binary counter
 const int UP[] = {1,3,7,15,31,63,127,255};
 const int DOWN[] = {128,192,224,240,248,252,254,255};
@@ -66,6 +66,15 @@ void flashNtimes(uint8_t value, int n){
 	}
 }
 
+ADXL345 accel;
+Pedometer pedometer;
+MovingList<float> magnitudes(5);  //list of magnitudes used for keeping track of average magnitude for range and sleep purposes
+bool tapped = false;
+bool transmitted = true;
+bool transmitting = false;
+int trials =0;
+int maxTrials = 1;
+
 bool handshake(uint16_t trials, unsigned long int numSteps){
 	uint8_t buffer = 0;
 	digitalWrite(RADIO_SLEEP,LOW);
@@ -99,6 +108,7 @@ bool handshake(uint16_t trials, unsigned long int numSteps){
 }
 
 bool getReceipt(String header, String data){
+	transmitting = true;
 	digitalWrite(RADIO_SLEEP, LOW);
 	digitalWrite(LED_BUILTIN,HIGH);
 	delay(100);
@@ -126,23 +136,28 @@ bool getReceipt(String header, String data){
 	Serial1.flush();
 	digitalWrite(RADIO_SLEEP, HIGH);
 	digitalWrite(LED_BUILTIN,LOW);
+	transmitting=false;
 	return a!=-1;
 }
 
 
-ADXL345 accel;
-Pedometer pedometer;
-MovingList<float> magnitudes(5);  //list of magnitudes used for keeping track of average magnitude for range and sleep purposes
-bool tapped = false;
-bool transmitted = true;
-int trials =0;
-int maxTrials = 1;
+
 //
+bool getNewButtonPush(){
+	static bool buttonPress = false;
+	static bool oldButtonPress = false;
+	buttonPress = digitalRead(SEND_BUTTON);
+	bool ans = buttonPress &! oldButtonPress;
+	oldButtonPress = buttonPress;
+	return ans;
+	
+}
 void wakeup(){
 	if(asleep){
+		accel.wakeUp();
 		flashNtimes(0xA5, 5);
 	}
-	tapped |= accel.getTap();
+	tapped |= getNewButtonPush();
 	transmitted &= !tapped;
 	asleep = false;
 }
@@ -150,8 +165,10 @@ void wakeup(){
 void goToSleep(){
 	set_sleep_mode(SLEEP_MODE_PWR_DOWN);
 	cli();
-	if(pedometer.ready() && !tapped && transmitted){
+	if(pedometer.ready()&& !transmitting){
 		asleep=true;
+		accel.sleep();
+		displayLED(0);
 		sleep_enable();
 		sei();
 		sleep_cpu();
@@ -161,12 +178,12 @@ void goToSleep(){
 }
 
 
-
 void setup() {
 
 	//setup SPI interface for CPOL=1, CPHA=1 or SPI_MODE_3 in Arduino
 	pinMode(RADIO_SLEEP,OUTPUT);
 	pinMode(WAKEUP_PIN, INPUT_PULLUP);
+	pinMode(SEND_BUTTON, INPUT_PULLUP);
 	//pinMode(TAP_PIN,INPUT);
 	for (auto i: LEDS){  //set up LEDs for binary counter
 		pinMode(i, OUTPUT);

@@ -175,7 +175,7 @@ void ADXL345::wakeUp(){
 void ADXL345::sleep(){
 	uint8_t currentPowerCtrl = readRegister(POWER_CTRL);
 	uint8_t newValue = modifyBit(currentPowerCtrl,2,1);  //set sleep bit to 1
-	newValue = modifyBit(newValue,3,0); //set measure bit to 0
+	//newValue = modifyBit(newValue,3,1); //set measure bit to 0
 	writeRegister(POWER_CTRL, newValue);
 }
 
